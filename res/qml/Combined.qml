@@ -1,12 +1,12 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Window 2.2
+import "controls"
 
 Item {
     id: root
     width: 1280
     height: 720
-    FontLoader { id: tronFont; source: "fonts/uifont.ttf" }
     property int activeChannel: -1
 
     signal channelTextureChanged(int channel, int type, string url)
@@ -156,7 +156,7 @@ Item {
         }
     }
 
-    CustomBorder {
+    Border {
         z: 1
         width: 1200
         height: 128
@@ -167,7 +167,7 @@ Item {
         border.width: 10
         anchors.horizontalCenter: parent.horizontalCenter
         visible: false
-        CustomText {
+        Text {
             verticalAlignment: Text.AlignVCenter
             horizontalAlignment: Text.AlignHCenter
             anchors.fill: parent

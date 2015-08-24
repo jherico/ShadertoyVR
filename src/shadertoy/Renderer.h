@@ -58,8 +58,8 @@ public:
         return texturePath;
     }
 
-    virtual bool setShaderSourceInternal(QString source);
-    virtual TextureData loadTexture(QString source);
+    virtual bool setShaderSourceInternal(const QString& source);
+    virtual TextureData loadTexture(const QString& source);
     virtual void setChannelTextureInternal(int channel, shadertoy::ChannelInputType type, const QString & textureSource);
     virtual void setShaderInternal(const shadertoy::Shader & shader);
 

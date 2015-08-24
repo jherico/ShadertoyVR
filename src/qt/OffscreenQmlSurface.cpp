@@ -5,12 +5,15 @@
 //  Distributed under the Apache License, Version 2.0.
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
-#include "QtCommon.h"
+#include "Common.h"
+
+#include "OffscreenQmlSurface.h"
 
 #include <QOpenGLFramebufferObject>
-#include <QOpenGLDebugLogger>
 #include <QGLWidget>
 #include <QtQml>
+
+#include "QtUtils.h"
 
 // Time between receiving a request to render the offscreen UI actually triggering
 // the render.  Could possibly be increased depending on the framerate we expect to
@@ -68,19 +71,10 @@ void OffscreenQmlSurface::create(QOpenGLContext* shareContext) {
     connect(_renderControl, &QQuickRenderControl::renderRequested, this, &OffscreenQmlSurface::requestRender);
     connect(_renderControl, &QQuickRenderControl::sceneChanged, this, &OffscreenQmlSurface::requestUpdate);
 
-#ifdef DEBUG
-    connect(_quickWindow, &QQuickWindow::focusObjectChanged, [this]{
-        qCDebug(offscreenFocus) << "New focus item " << _quickWindow->focusObject();
-    });
-    connect(_quickWindow, &QQuickWindow::activeFocusItemChanged, [this] {
-        qCDebug(offscreenFocus) << "New active focus item " << _quickWindow->activeFocusItem();
-    });
-#endif
-
     _qmlComponent = new QQmlComponent(_qmlEngine);
     // Initialize the render control and our OpenGL resources.
     makeCurrent();
-    _renderControl->initialize(&_context);
+    _renderControl->initialize(_context);
 }
 
 void OffscreenQmlSurface::resize(const QSize& newSize) {

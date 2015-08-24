@@ -7,7 +7,7 @@
 //
 #pragma once
 
-#include <QOffscreenSurface>
+#include <QtGui/QOffscreenSurface>
 
 class OffscreenGlSurface : public QOffscreenSurface {
 public:
@@ -18,5 +18,5 @@ public:
     void doneCurrent();
     QOpenGLContext* context();
 protected:
-    QOpenGLContext _context;
+    QOpenGLContext* _context;
 };

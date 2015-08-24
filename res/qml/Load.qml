@@ -3,9 +3,10 @@ import QtQuick.Controls 1.2
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.0
 import Qt.labs.folderlistmodel 1.0
+import ShadertoyVR 1.0
+import "controls"
 
-
-Item {
+LoadWindow {
     id: loadRoot
     objectName: "loadRoot"
     width: 1280
@@ -32,16 +33,16 @@ Item {
         Rectangle {
             width: 256 - 24; height: 40
             color: "slategray"; radius: 5
-//            Behavior on y {
-//                SpringAnimation {
-//                    spring: 3
-//                    damping: 0.2
-//                }
-//            }
+            Behavior on y {
+                SpringAnimation {
+                    spring: 3
+                    damping: 0.2
+                }
+            }
         }
     }
 
-    CustomBorder {
+    Border {
         id: presetsBorder
         width: 256
         anchors.left: parent.left
@@ -62,7 +63,7 @@ Item {
             highlight: highlight
             highlightFollowsCurrentItem: true
             focus: true
-            delegate: CustomText {
+            delegate: Text {
                 text: modelData
                 MouseArea {
                     z: 1
@@ -87,7 +88,7 @@ Item {
         }
     }
 
-    CustomBorder {
+    Border {
         id: userShadersBorder
         width: 256
         anchors.right: parent.right
@@ -118,7 +119,7 @@ Item {
             highlightMoveDuration: 10
             focus: true
             model: userPresetsModel
-            delegate: CustomText {
+            delegate: Text {
                 text: fileName
                 MouseArea {
                     z: 1
@@ -166,7 +167,7 @@ Item {
         spacing: 8
         anchors.margins: 8
 
-        CustomButton {
+        Button {
             width: 192
             id: load
             text: qsTr("Load")
@@ -182,7 +183,7 @@ Item {
            }
         }
 
-        CustomButton {
+        Button {
             id: cancel
             width: 192
             text: qsTr("Cancel")
@@ -192,7 +193,7 @@ Item {
         }
     }
 
-    CustomBorder {
+    Border {
         id: shaderInfoBorder
         anchors.bottom: buttonRow.top
         anchors.bottomMargin: 8
@@ -225,10 +226,10 @@ Item {
             anchors.leftMargin: 12
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 12
-            CustomText { id: label1; width: 192; text: "Name"; anchors.top: parent.top; anchors.topMargin: 0; anchors.left: parent.left; anchors.leftMargin: 0 }
-            CustomText { id:shaderInfoName; text: " " ; anchors.right: parent.right; anchors.rightMargin: 0; anchors.left: label1.right;anchors.leftMargin: 8 }
-            CustomText { id: label2; width: 192; text: "Description"; anchors.left: parent.left; anchors.leftMargin: 0; anchors.top: label1.bottom; anchors.topMargin: 8 }
-            CustomTextArea {
+            Text { id: label1; width: 192; text: "Name"; anchors.top: parent.top; anchors.topMargin: 0; anchors.left: parent.left; anchors.leftMargin: 0 }
+            Text { id:shaderInfoName; text: " " ; anchors.right: parent.right; anchors.rightMargin: 0; anchors.left: label1.right;anchors.leftMargin: 8 }
+            Text { id: label2; width: 192; text: "Description"; anchors.left: parent.left; anchors.leftMargin: 0; anchors.top: label1.bottom; anchors.topMargin: 8 }
+            TextArea {
                 clip: true
                 id:shaderInfoDescription;
                 text: " " ; anchors.bottom: parent.bottom; anchors.bottomMargin: 0; anchors.right: parent.right; anchors.rightMargin: 0; anchors.left: label2.right; anchors.leftMargin: 8; anchors.top: label2.top;anchors.topMargin: 0

@@ -16,7 +16,7 @@ ShadertoyVR.CodeEditor {
     Item {
         anchors.fill: parent
 
-        CustomBorder {
+        Border {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
@@ -88,7 +88,7 @@ ShadertoyVR.CodeEditor {
             }
         }
 
-        CustomBorder {
+        Border {
             id: errorFrame
             objectName: "errorFrame"
             height: root.lineHeight * 6

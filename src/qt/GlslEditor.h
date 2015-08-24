@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QSyntaxHighlighter>
-
 class GlslHighlighter : public QSyntaxHighlighter {
   Q_OBJECT
 

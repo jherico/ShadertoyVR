@@ -7,15 +7,13 @@
 //
 #pragma once
 
-#include <QQmlEngine>
-#include <QQmlComponent>
-#include <QQuickItem>
-#include <QQuickWindow>
-#include <QQuickRenderControl>
-#include <QQuickImageProvider>
-#include <QTimer>
-#include <atomic>
-#include <functional>
+#include <QtQml/QQmlEngine>
+#include <QtQml/QQmlComponent>
+
+#include <QtQuick/QQuickItem>
+#include <QtQuick/QQuickWindow>
+#include <QtQuick/QQuickRenderControl>
+#include <QtQuick/QQuickImageProvider>
 
 #include "OffscreenGlSurface.h"
 #include "FboCache.h"

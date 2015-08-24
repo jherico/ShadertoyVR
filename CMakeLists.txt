@@ -3,19 +3,23 @@ include(cmake/defaults.cmake)
 
 project(ShadertoyVR)
 
+if (WIN32)
+  cmake_policy(SET CMP0020 NEW)
+endif (WIN32)
+
 set(TARGET_NAME ${PROJECT_NAME})
+
+#set(CMAKE_AUTOMOC_MOC_OPTIONS "-fCommon.h")
 
 find_package(Threads)
 list(APPEND ${PROJECT_NAME}_LIBS ${CMAKE_THREAD_LIBS_INIT})
 
-set(QT_COMPONENTS Core Gui OpenGL Network Qml Quick Xml)
+set(QT_COMPONENTS Core Gui OpenGL Network Qml Quick Xml XmlPatterns)
 find_package(Qt5 COMPONENTS ${QT_COMPONENTS} REQUIRED)
 foreach(QT_MODULE ${QT_COMPONENTS})
   list(APPEND ${PROJECT_NAME}_LIBS Qt5::${QT_MODULE})
   include_directories(${Qt5${QT_MODULE}_INCLUDE_DIRS})
 endforeach()
-
-#dump_cmake_vars()
 
 file(GLOB_RECURSE SOURCE_FILES src/*.h src/*.cpp)
 
@@ -38,6 +42,13 @@ elseif(APPLE)
 else()
     add_executable(${PROJECT_NAME} ${SOURCE_FILES} )
 endif()
+
+set(PCH_FILE "${CMAKE_SOURCE_DIR}/src/common/Common.cpp")
+list(REMOVE_ITEM SOURCE_FILES PCH_FILE)
+
+add_precompiled_header("Common.h" ${PCH_FILE} SOURCE_FILES)
+
+
 
 #
 # External Dependencies
@@ -66,9 +77,10 @@ add_definitions(-DGLEW_STATIC)
 list(APPEND ${PROJECT_NAME}_LIBS ${GLEW_LIBRARY})
 include_directories(${GLEW_INCLUDE_DIRS})
 
+add_dependency_external_projects(LibOVR)
+find_package(LibOVR REQUIRED)
+include_directories(${LIBOVR_INCLUDE_DIRS})
+list(APPEND ${PROJECT_NAME}_LIBS ${LIBOVR_LIBRARIES})
 
-target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_LIBS)
-
-#qt5_add_resources(COMMON_RCC Common.qrc)
-#list(APPEND SOURCE_FILES ${COMMON_RCC})
+target_link_libraries(${PROJECT_NAME} ${${PROJECT_NAME}_LIBS})
 

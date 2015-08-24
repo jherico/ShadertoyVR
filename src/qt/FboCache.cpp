@@ -9,11 +9,11 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-#include "QtCommon.h"
+#include "Common.h"
 
-#include <QOpenGLFramebufferObject>
-#include <QDebug>
-#include <QMutex>
+#include "FboCache.h"
+
+#include <QtGui/QOpenGLFramebufferObject>
 
 template <typename L, typename F>
 void withLock(L& l, F f) {

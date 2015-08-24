@@ -17,9 +17,13 @@ limitations under the License.
 
 ************************************************************************************/
 
-#include "QtCommon.h"
-#include "Shadertoy.h"
+#include "Common.h"
 #include "Renderer.h"
+
+#include <QtGui/QOpenGLContext>
+#include <QtGui/QOpenGLFunctions>
+
+#include "Shadertoy.h"
 
 using namespace oglplus;
 
@@ -28,7 +32,7 @@ void Renderer::setup() {
 
     initTextureCache();
 
-    setShaderSourceInternal(readFileToString(":/shaders/default.fs"));
+    setShaderSourceInternal(readFileToString(":/shadertoys/default.fs"));
     assert(shadertoyProgram);
     skybox = oria::loadSkybox(shadertoyProgram);
 
@@ -52,7 +56,7 @@ void Renderer::initTextureCache() {
         QString fileName = path.split("/").back();
         qDebug() << "Loading texture from " << path;
         TextureData & cacheEntry = textureCache[path];
-        cacheEntry.tex = oria::load2dTexture(readFileToVector(":" + path), cacheEntry.size);
+        cacheEntry.tex = oria::load2dTexture(":" + path, cacheEntry.size);
         canonicalPathMap["qrc:" + path] = path;
 
         // Backward compatibility
@@ -77,7 +81,7 @@ void Renderer::initTextureCache() {
         TextureData & cacheEntry = textureCache[path];
         cacheEntry.tex = oria::loadCubemapTexture([&](int i) {
             QString texturePath = pathTemplate.arg(i);
-            ImagePtr image = oria::loadImage(readFileToVector(":" + texturePath), false);
+            ImagePtr image = oria::loadImage(":" + texturePath, false);
             cacheEntry.size = uvec2(image->Width(), image->Height());
             return image;
         });
@@ -169,11 +173,12 @@ void Renderer::updateUniforms() {
     }
 }
 
-bool Renderer::setShaderSourceInternal(QString source) {
+bool Renderer::setShaderSourceInternal(const QString& originalSource) {
+    QString source = originalSource;
     try {
         position = vec3();
         if (!vertexShader) {
-            QString vertexShaderSource = readFileToString(":/shaders/default.vs").toLocal8Bit().constData();
+            QString vertexShaderSource = readFileToString(":/shadertoys/default.vs");
             vertexShader = VertexShaderPtr(new VertexShader());
             vertexShader->Source(vertexShaderSource.toLocal8Bit().constData());
             vertexShader->Compile();
@@ -219,20 +224,17 @@ bool Renderer::setShaderSourceInternal(QString source) {
     return true;
 }
 
-Renderer::TextureData Renderer::loadTexture(QString source) {
-    qDebug() << "Looking for texture " << source;
+Renderer::TextureData Renderer::loadTexture(const QString& originalSource) {
+    qDebug() << "Looking for texture " << originalSource;
+    QString source = originalSource;
     while (canonicalPathMap.count(source)) {
         source = canonicalPathMap[source];
     }
 
     if (!textureCache.count(source)) {
         qWarning() << "Texture " << source << " not found, loading";
-        std::vector<uint8_t> textureData = readFileToVector(source);
-        if (!textureData.empty()) {
-            textureCache[source].tex = oria::load2dTexture(textureData, textureCache[source].size);
-        } else {
-            qWarning() << "Could not load texture";
-        }
+        TextureData& textureData = textureCache[source];
+        textureData.tex = oria::load2dTexture(source, textureData.size);
     }
     return textureCache[source];
 }

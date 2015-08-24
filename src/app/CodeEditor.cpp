@@ -1,4 +1,5 @@
-#include <QtCommon.h>
+#include "Common.h"
+
 #include "CodeEditor.h"
 
 CodeEditor::CodeEditor(QQuickItem* parent) : QQuickItem(parent) {

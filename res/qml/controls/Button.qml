@@ -8,10 +8,10 @@ Button {
     width: 128
     height: 64
     style: ButtonStyle {
-        background:  CustomBorder {
+        background:  Border {
             anchors.fill: parent
         }
-        label: CustomText {
+        label: Text {
            renderType: Text.NativeRendering
            verticalAlignment: Text.AlignVCenter
            horizontalAlignment: Text.AlignHCenter

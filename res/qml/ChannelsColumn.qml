@@ -3,6 +3,7 @@ import QtQuick.Controls 1.3
 import QtQuick.Controls.Styles 1.3
 import Qt.labs.settings 1.0
 import ShadertoyVR 1.0 as ShadertoyVR
+import "controls"
 
 ShadertoyVR.ChannelsColumn {
     id: root
@@ -17,7 +18,7 @@ ShadertoyVR.ChannelsColumn {
         anchors.topMargin: 0
         spacing: 8
 
-        CustomBorder {
+        Border {
             id: channel0control
             height: 128 + 24
             width: 128 + 24
@@ -34,7 +35,7 @@ ShadertoyVR.ChannelsColumn {
             }
         }
 
-        CustomBorder {
+        Border {
             id: channel1control
             height: 128 + 24
             width: 128 + 24
@@ -51,7 +52,7 @@ ShadertoyVR.ChannelsColumn {
             }
         }
 
-        CustomBorder {
+        Border {
             id: channel2control
             height: 128 + 24
             width: 128 + 24
@@ -68,7 +69,7 @@ ShadertoyVR.ChannelsColumn {
             }
         }
 
-        CustomBorder {
+        Border {
             id: channel3control
             height: 128 + 24
             width: 128 + 24

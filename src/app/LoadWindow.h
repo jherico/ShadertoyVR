@@ -16,36 +16,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 ************************************************************************************/
+#pragma once
 
-#include "Common.h"
+#include <QQuickItem>
 
-#include "MainWindow.h"
+class LoadWindow : public QQuickItem {
+    Q_OBJECT
 
-#include <QtGui/QOpenGLContext>
-#include <QtGui/QOpenGLDebugLogger>
-
-#include "qt/QtCommon.h"
-#include "ShadertoyApp.h"
-#include "display/DisplayPlugins.h"
-
-extern Plugins::Display::Plugin** DISPLAY_PLUGINS;
-extern size_t DISPLAY_PLUGIN_COUNT;
-
-MainWindow::MainWindow(QQuickItem* parent) {
-    Plugins::Display::list(DISPLAY_PLUGINS);
-    for (size_t i = 0; i < DISPLAY_PLUGIN_COUNT; ++i) {
-        Plugins::Display::Plugin* plugin = DISPLAY_PLUGINS[i];
-        _displayPlugins << plugin->name();
-    }
-}
-
-MainWindow::~MainWindow() {
-}
-
-const QStringList& MainWindow::displayPlugins() {
-    return _displayPlugins;
-}
-
-void MainWindow::activatePlugin(int index) {
-    qApp->activatePlugin(index);
-}
+public:
+    LoadWindow(QQuickItem* parent = nullptr);
+    virtual ~LoadWindow();
+};

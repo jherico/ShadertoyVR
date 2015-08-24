@@ -1,9 +1,8 @@
-#include "Window.h"
-#include <QWindow>
+#include "Common.h"
+#include "DisplayPlugins.h"
+
 #include <QOpenGLContext>
 #include <QSurfaceFormat>
-#include <QCoreApplication>
-#include <QTimer>
 
 using namespace Plugins::Display;
 

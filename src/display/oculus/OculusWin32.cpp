@@ -1,7 +1,11 @@
-#include "QtCommon.h"
+#include "Common.h"
+
 #include "OculusWin32.h"
+
+#include "qt/QtUtils.h"
 #include <OVR_CAPI_GL.h>
 #include <GL/wglew.h>
+
 using namespace Plugins::Display;
 
 // A basic wrapper for constructing a framebuffer with a renderbuffer
@@ -76,8 +80,8 @@ protected:
 
 
 // A base class for FBO wrappers that need to use the Oculus C
-// API to manage textures via ovrHmd_CreateSwapTextureSetGL,
-// ovrHmd_CreateMirrorTextureGL, etc
+// API to manage textures via ovr_CreateSwapTextureSetGL,
+// ovr_CreateMirrorTextureGL, etc
 template <typename C>
 struct RiftFramebufferWrapper : public OvrFramebufferWrapper<C, char> {
     ovrHmd hmd;
@@ -112,7 +116,7 @@ struct SwapFramebufferWrapper : public RiftFramebufferWrapper<ovrSwapTextureSet*
 
     ~SwapFramebufferWrapper() {
         if (color) {
-            ovrHmd_DestroySwapTextureSet(hmd, color);
+            ovr_DestroySwapTextureSet(hmd, color);
             color = nullptr;
         }
     }
@@ -125,11 +129,11 @@ struct SwapFramebufferWrapper : public RiftFramebufferWrapper<ovrSwapTextureSet*
 protected:
     virtual void initColor() override {
         if (color) {
-            ovrHmd_DestroySwapTextureSet(hmd, color);
+            ovr_DestroySwapTextureSet(hmd, color);
             color = nullptr;
         }
 
-        ovrResult result = ovrHmd_CreateSwapTextureSetGL(hmd, GL_RGBA, size.x, size.y, &color);
+        ovrResult result = ovr_CreateSwapTextureSetGL(hmd, GL_RGBA, size.x, size.y, &color);
         Q_ASSERT(OVR_SUCCESS(result));
 
         for (int i = 0; i < color->TextureCount; ++i) {
@@ -168,7 +172,7 @@ struct MirrorFramebufferWrapper : public RiftFramebufferWrapper<ovrGLTexture*> {
 
     virtual ~MirrorFramebufferWrapper() {
         if (color) {
-            ovrHmd_DestroyMirrorTexture(hmd, (ovrTexture*)color);
+            ovr_DestroyMirrorTexture(hmd, (ovrTexture*)color);
             color = nullptr;
         }
     }
@@ -176,10 +180,10 @@ struct MirrorFramebufferWrapper : public RiftFramebufferWrapper<ovrGLTexture*> {
 private:
     void initColor() override {
         if (color) {
-            ovrHmd_DestroyMirrorTexture(hmd, (ovrTexture*)color);
+            ovr_DestroyMirrorTexture(hmd, (ovrTexture*)color);
             color = nullptr;
         }
-        ovrResult result = ovrHmd_CreateMirrorTextureGL(hmd, GL_RGBA, size.x, size.y, (ovrTexture**)&color);
+        ovrResult result = ovr_CreateMirrorTextureGL(hmd, GL_RGBA, size.x, size.y, (ovrTexture**)&color);
         Q_ASSERT(OVR_SUCCESS(result));
     }
 
@@ -278,7 +282,7 @@ class OculusWin32DisplayPlugin : public Plugins::Display::Plugin {
     virtual void postRender() override;
 
     virtual void resetPose() {
-        ovrHmd_RecenterPose(_hmd);
+        ovr_RecenterPose(_hmd);
     }
 
 private:
@@ -294,6 +298,8 @@ private:
 
     // Oculus specific code
     ovrHmd _hmd{ nullptr };
+	ovrGraphicsLuid _luid;
+	ovrHmdDesc _hmdDesc;
     SwapFramebufferWrapper* _sceneSwapFbo{ nullptr };
     SwapFramebufferWrapper* _uiSwapFbo{ nullptr };
     MirrorFramebufferWrapper* _mirrorFbo{ nullptr };
@@ -321,23 +327,20 @@ bool OculusWin32DisplayPlugin::start() {
 #endif
         ovrResult result = ovr_Initialize(&initParams);
         Q_ASSERT(OVR_SUCCESS(result));
-        result = ovrHmd_Create(0, &_hmd);
+        result = ovr_Create(&_hmd, &_luid);
+		_hmdDesc = ovr_GetHmdDesc(_hmd);
 
         for_each_eye([&](ovrEyeType eye) {
-            _eyeFovs[eye] = _hmd->DefaultEyeFov[eye];
+            _eyeFovs[eye] = _hmdDesc.DefaultEyeFov[eye];
             _eyeProjections[eye] = toGlm(ovrMatrix4f_Projection(_eyeFovs[eye],
                 0.01f, 100.0f, ovrProjection_RightHanded));
-            ovrEyeRenderDesc erd = ovrHmd_GetRenderDesc(_hmd, eye, _eyeFovs[eye]);
+            ovrEyeRenderDesc erd = ovr_GetRenderDesc(_hmd, eye, _eyeFovs[eye]);
             _eyeOffsets[eye] = erd.HmdToEyeViewOffset;
         });
-        _eyeTextureSize = ovrHmd_GetFovTextureSize(_hmd, ovrEye_Left, _eyeFovs[ovrEye_Left], 1.0f);
+        _eyeTextureSize = ovr_GetFovTextureSize(_hmd, ovrEye_Left, _eyeFovs[ovrEye_Left], 1.0f);
         _renderTargetSize = { _eyeTextureSize.w * 2, _eyeTextureSize.h };
 
-
-        ovrHmd_SetEnabledCaps(_hmd,
-            ovrHmdCap_LowPersistence | ovrHmdCap_DynamicPrediction);
-
-        ovrHmd_ConfigureTracking(_hmd,
+        ovr_ConfigureTracking(_hmd,
             ovrTrackingCap_Orientation | ovrTrackingCap_Position | ovrTrackingCap_MagYawCorrection,
             ovrTrackingCap_Orientation);
 
@@ -412,7 +415,7 @@ bool OculusWin32DisplayPlugin::start() {
     _uiLayer.QuadPoseCenter.Orientation = { 0, 0, 0, 1 };
     _uiLayer.QuadPoseCenter.Position = { 0, 0, -1 }; 
     _uiLayer.QuadSize = { aspect(_uiSize), 1.0f };
-    _uiLayer.Viewport = { { 0, 0 }, { _uiSize.x, _uiSize.y } };
+    _uiLayer.Viewport = { { 0, 0 }, { (int)_uiSize.x, (int)_uiSize.y } };
 
     _timer.start(0);
 
@@ -444,7 +447,7 @@ void OculusWin32DisplayPlugin::stop() {
     _context = nullptr;
 
     if (_hmd) {
-        ovrHmd_Destroy(_hmd);
+        ovr_Destroy(_hmd);
         _hmd = nullptr;
     }
     ovr_Shutdown();
@@ -478,7 +481,7 @@ glm::mat4 OculusWin32DisplayPlugin::pose(Plugins::Display::Eye eye) const {
 }
 
 void OculusWin32DisplayPlugin::preRender() {
-    ovrHmd_GetEyePoses(_hmd, 0, _eyeOffsets, _eyePoses, nullptr);
+    ovr_GetEyePoses(_hmd, 0, _eyeOffsets, _eyePoses, nullptr);
     bool result = _context->makeCurrent(_window);
     Q_ASSERT(result);
 }
@@ -490,7 +493,7 @@ void OculusWin32DisplayPlugin::render(
     //ovrPerfHud_RenderTiming
     //ovrPerfHud_Off
     //ovrPerfHud_LatencyTiming
-    //ovrHmd_SetInt(_hmd, "PerfHudMode", (int)ovrPerfHud_RenderTiming);
+    //ovr_SetInt(_hmd, "PerfHudMode", (int)ovrPerfHud_RenderTiming);
     if (uiTexture) {
         _uiSwapFbo->Bound(oglplus::Framebuffer::Target::Draw, [&] {
             glViewport(0, 0, _uiSize.x, _uiSize.y);
@@ -512,7 +515,7 @@ void OculusWin32DisplayPlugin::render(
     for_each_eye([&](ovrEyeType eye) {
         _sceneLayer.RenderPose[eye] = _eyePoses[eye];
     });
-    ovrResult res = ovrHmd_SubmitFrame(_hmd, 0, nullptr, _layers, uiTexture ? 2 : 1);
+    ovrResult res = ovr_SubmitFrame(_hmd, 0, nullptr, _layers, uiTexture ? 2 : 1);
 
     // Blit to the onscreen window
     _mirrorFbo->Bound(oglplus::Framebuffer::Target::Read, [&] {

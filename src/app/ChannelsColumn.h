@@ -17,7 +17,7 @@ limitations under the License.
 
 ************************************************************************************/
 #pragma once
-
+#include "Common.h"
 #include <QQuickItem>
 #include <QQuickTextDocument>
 

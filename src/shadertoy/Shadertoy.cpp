@@ -17,13 +17,10 @@ limitations under the License.
 
 ************************************************************************************/
 
-#include "QtCommon.h"
+#include "Common.h"
 #include "Shadertoy.h"
 
-#include <QDomDocument>
-#include <QXmlQuery>
-#include <QJsonValue>
-#include <QJsonDocument>
+#include "qt/QtUtils.h"
 
 namespace shadertoy {
 

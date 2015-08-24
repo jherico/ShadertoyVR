@@ -4,8 +4,8 @@ string(TOUPPER ${EXTERNAL_NAME} EXTERNAL_NAME_UPPER)
 include(ExternalProject)
 ExternalProject_Add(
     ${EXTERNAL_NAME}
-    URL http://iweb.dl.sourceforge.net/project/oglplus/oglplus-0.63.x/oglplus-0.63.0.zip
-    URL_MD5 de984ab245b185b45c87415c0e052135
+    URL http://skylineservers.dl.sourceforge.net/project/oglplus/oglplus-0.65.x/oglplus-0.65.0.zip
+    URL_MD5 724bfc0794a952211fb0b41d0fbc4fde
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""

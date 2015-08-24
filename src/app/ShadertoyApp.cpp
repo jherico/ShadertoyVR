@@ -1,9 +1,17 @@
-#include "qt/QtCommon.h"
+#include "Common.h"
+
 #include "ShadertoyApp.h"
-#include <QQmlContext>
+
+#include <QtQml/QQmlContext>
+
+#include "qt/QtUtils.h"
+#include "qt/GlslEditor.h"
+
 #include "CodeEditor.h"
 #include "ChannelsColumn.h"
-#include "qt/GlslEditor.h"
+#include "LoadWindow.h"
+#include "EditWindow.h"
+
 
 using namespace oglplus;
 using namespace Plugins::Display;
@@ -16,38 +24,38 @@ static float UI_ASPECT = aspect(vec2(UI_SIZE));
 static float UI_INVERSE_ASPECT = 1.0f / UI_ASPECT;
 
 const QStringList PRESETS({
-    ":/shaders/default.xml",
-    ":/shaders/4df3DS.json",
-    ":/shaders/4dfGzs.json",
-    ":/shaders/4djGWR.json",
-    ":/shaders/4ds3zn.json",
-    ":/shaders/4dXGRM_flying_steel_cubes.xml",
-    // ":/shaders/4sBGD1.json",
-    // ":/shaders/4slGzn.json",
-    ":/shaders/4sX3R2.json", // Monster
-    ":/shaders/4sXGRM_oceanic.xml",
-    ":/shaders/4tXGDn.json", // Morphing
-    //":/shaders/ld23DG_crazy.xml",
-    ":/shaders/ld2GRz.json", // meta-balls
-    // ":/shaders/ldfGzr.json",
-    // ":/shaders/ldj3Dm.json", // fish swimming
-    ":/shaders/ldl3zr_mobius_balls.xml",
-    // ":/shaders/ldSGRW.json",
-    // ":/shaders/lsl3W2.json",
-    ":/shaders/lss3WS_relentless.xml",
-    // ":/shaders/lts3Wn.json",
-    ":/shaders/MdX3Rr.json", // elevated
-    // ":/shaders/MsBGRh.json",
-    // ":/shaders/MsSGD1_hand_drawn_sketch.xml",
-    ":/shaders/MsXGz4.json", // cubemap
-    ":/shaders/MsXGzM.json", // voronoi rocks
-    // ":/shaders/MtfGR8_snowglobe.xml",
-    // ":/shaders/XdBSzd.json",
-    ":/shaders/Xlf3D8.json", // sci-fi
-    ":/shaders/XsBSRG_morning_city.xml",
-    ":/shaders/XsjXR1.json", // worms
-    ":/shaders/XslXW2.json", // mechanical (2D)
-    // ":/shaders/XsSSRW.json"
+    ":/shadertoys/default.xml",
+    ":/shadertoys/4df3DS.json",
+    ":/shadertoys/4dfGzs.json",
+    ":/shadertoys/4djGWR.json",
+    ":/shadertoys/4ds3zn.json",
+    ":/shadertoys/4dXGRM_flying_steel_cubes.xml",
+    // ":/shadertoys/4sBGD1.json",
+    // ":/shadertoys/4slGzn.json",
+    ":/shadertoys/4sX3R2.json", // Monster
+    ":/shadertoys/4sXGRM_oceanic.xml",
+    ":/shadertoys/4tXGDn.json", // Morphing
+    //":/shadertoys/ld23DG_crazy.xml",
+    ":/shadertoys/ld2GRz.json", // meta-balls
+    // ":/shadertoys/ldfGzr.json",
+    // ":/shadertoys/ldj3Dm.json", // fish swimming
+    ":/shadertoys/ldl3zr_mobius_balls.xml",
+    // ":/shadertoys/ldSGRW.json",
+    // ":/shadertoys/lsl3W2.json",
+    ":/shadertoys/lss3WS_relentless.xml",
+    // ":/shadertoys/lts3Wn.json",
+    ":/shadertoys/MdX3Rr.json", // elevated
+    // ":/shadertoys/MsBGRh.json",
+    // ":/shadertoys/MsSGD1_hand_drawn_sketch.xml",
+    ":/shadertoys/MsXGz4.json", // cubemap
+    ":/shadertoys/MsXGzM.json", // voronoi rocks
+    // ":/shadertoys/MtfGR8_snowglobe.xml",
+    // ":/shadertoys/XdBSzd.json",
+    ":/shadertoys/Xlf3D8.json", // sci-fi
+    ":/shadertoys/XsBSRG_morning_city.xml",
+    ":/shadertoys/XsjXR1.json", // worms
+    ":/shadertoys/XslXW2.json", // mechanical (2D)
+    // ":/shadertoys/XsSSRW.json"
 });
 
 
@@ -58,7 +66,7 @@ const char * APP_NAME = "ShadertoyVR";
 QDir CONFIG_DIR;
 QSharedPointer<QFile> LOG_FILE;
 QtMessageHandler ORIGINAL_MESSAGE_HANDLER;
-static const QUrl SOURCE{ "qrc:layouts/DesktopWindow.qml" };
+static const QUrl SOURCE{ "file:///C:/Users/bdavis/Git/ShadertoyVR/res/qml/DesktopWindow.qml" };
 QQuickView* MAIN_WINDOW{ nullptr };
 Plugin** DISPLAY_PLUGINS{ nullptr };
 size_t DISPLAY_PLUGIN_COUNT;
@@ -112,6 +120,7 @@ void messageHandler(QtMsgType type, const QMessageLogContext &context, const QSt
 }
 
 ShadertoyApp::ShadertoyApp(int argc, char ** argv) : QGuiApplication(argc, argv) {
+    Q_INIT_RESOURCE(ShadertoyVR);
     initTracker();
     initAppInformation();
     initResources();
@@ -191,7 +200,10 @@ void ShadertoyApp::initTypes() {
     qmlRegisterType<MainWindow>("ShadertoyVR", 1, 0, "MainWindow");
     qmlRegisterType<CodeEditor>("ShadertoyVR", 1, 0, "CodeEditor");
     qmlRegisterType<ChannelsColumn>("ShadertoyVR", 1, 0, "ChannelsColumn");
+    qmlRegisterType<LoadWindow>("ShadertoyVR", 1, 0, "LoadWindow");
+    qmlRegisterType<EditWindow>("ShadertoyVR", 1, 0, "EditWindow");
 }
+
 
 void ShadertoyApp::initUi() {
     static QQmlEngine engine;
@@ -210,6 +222,11 @@ void ShadertoyApp::setupGlContext() {
     _testTexture->Bind(oglplus::Texture::Target::_2D);
     shaderFramebuffer = FramebufferWrapperPtr(new FramebufferWrapper());
 
+    qDebug() << "GL Version: " << QString((const char*)glGetString(GL_VERSION));
+    qDebug() << "GL Shader Language Version: " << QString((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
+    qDebug() << "GL Vendor: " << QString((const char*)glGetString(GL_VENDOR));
+    qDebug() << "GL Renderer: " << QString((const char*)glGetString(GL_RENDERER));
+
     _surface.doneCurrent();
 }
 
@@ -224,12 +241,13 @@ void ShadertoyApp::setupOffscreenUi() {
         }
         auto qmlContext = _uiSurface.getEngine()->rootContext();
         qmlContext->setContextProperty("presetsModel", QVariant::fromValue(dataList));
+        qmlContext->setContextProperty("activeShader", &_activeShader);
         QUrl url = QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/shaders");
         qmlContext->setContextProperty("userPresetsFolder", url);
     }
 
 
-    QUrl qml = QUrl("qrc:/layouts/Combined.qml");
+    QUrl qml = QUrl("qrc:/qml/Combined.qml");
     //_uiSurface.m_qmlEngine->addImportPath("./qml");
     //_uiSurface.m_qmlEngine->addImportPath("./layouts");
     //_uiSurface.m_qmlEngine->addImportPath(".");
@@ -245,23 +263,20 @@ void ShadertoyApp::setupOffscreenUi() {
     _codeEditor->setText("Test text");
     _codeEditor->setErrorText("Test error text");
     
+    // FIXME add confirmation for when the user might lose edits.
+    QObject::connect(rootItem, SIGNAL(loadPreset(int)), this, SLOT(loadPreset(int)));
+    QObject::connect(rootItem, SIGNAL(loadNextPreset()), this, SLOT(loadNextPreset()));
+    QObject::connect(rootItem, SIGNAL(loadPreviousPreset()), this, SLOT(loadPreviousPreset()));
+    QObject::connect(rootItem, SIGNAL(loadShaderFile(QString)), this, SLOT(loadShaderFile(QString)));
+
+//    QObject::connect(rootItem, SIGNAL(channelTextureChanged(int, int, QString)),
+//        this, SLOT(onChannelTextureChanged(int, int, QString)));
     /*
     QObject::connect(rootItem, SIGNAL(toggleUi()),
         this, SLOT(onToggleUi()));
-    QObject::connect(rootItem, SIGNAL(channelTextureChanged(int, int, QString)),
-        this, SLOT(onChannelTextureChanged(int, int, QString)));
     QObject::connect(rootItem, SIGNAL(shaderSourceChanged(QString)),
         this, SLOT(onShaderSourceChanged(QString)));
 
-    // FIXME add confirmation for when the user might lose edits.
-    QObject::connect(rootItem, SIGNAL(loadPreset(int)),
-        this, SLOT(onLoadPreset(int)));
-    QObject::connect(rootItem, SIGNAL(loadNextPreset()),
-        this, SLOT(onLoadNextPreset()));
-    QObject::connect(rootItem, SIGNAL(loadPreviousPreset()),
-        this, SLOT(onLoadPreviousPreset()));
-    QObject::connect(rootItem, SIGNAL(loadShaderFile(QString)),
-        this, SLOT(onLoadShaderFile(QString)));
     QObject::connect(rootItem, SIGNAL(saveShaderXml(QString)),
         this, SLOT(onSaveShaderXml(QString)));
     QObject::connect(rootItem, SIGNAL(recenterPose()),
@@ -287,7 +302,7 @@ void ShadertoyApp::setupOffscreenUi() {
     QObject::connect(rootItem, SIGNAL(newPresetHighlighted(int)),
         this, SLOT(onNewPresetHighlighted(int)));
     */
-    _uiSurface.resume();
+    loadPreset(0);
 }
 
 
@@ -295,7 +310,6 @@ void ShadertoyApp::setupRenderer() {
     _surface.makeCurrent();
     _renderer.setup();
     _surface.doneCurrent();
-//    _renderer.start();
 
     QObject::connect(&_renderer, &Renderer::compileSuccess, this, [&] {
         _codeEditor->setErrorText("");
@@ -740,20 +754,22 @@ void ShadertoyApp::onSaveShaderXml(const QString & shaderPath) {
     qDebug() << "Saving shader to " << destinationFile;
     shadertoy::saveShaderXml(destinationFile, activeShader);
 }
+#endif
 
 void ShadertoyApp::onChannelTextureChanged(const int & channelIndex, const int & channelType, const QString & texturePath) {
     qDebug() << "Requesting texture from path " << texturePath;
     queueRenderThreadTask([&, channelIndex, channelType, texturePath] {
         qDebug() << texturePath;
-        activeShader.channelTypes[channelIndex] = (shadertoy::ChannelInputType)channelType;
-        activeShader.channelTextures[channelIndex] = texturePath.toLocal8Bit();
-        renderer.setChannelTextureInternal(channelIndex,
-            (shadertoy::ChannelInputType)channelType,
-            texturePath);
-        renderer.updateUniforms();
+        _renderer.setChannelTextureInternal(channelIndex, (shadertoy::ChannelInputType)channelType, texturePath);
+        //activeShader.channelTypes[channelIndex] = channelIndex;
+        //activeShader.channelTextures[channelIndex] = texturePath.toLocal8Bit();
+        //renderer.setChannelTextureInternal(channelIndex,
+        //    (shadertoy::ChannelInputType)channelType,
+        //    texturePath);
+        //renderer.updateUniforms();
     });
 }
-
+#if 0
 void ShadertoyApp::onModifyTextureResolution(double scale) {
     float newRes = scale * texRes;
     newRes = std::max(0.1f, std::min(1.0f, newRes));

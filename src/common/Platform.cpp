@@ -19,7 +19,7 @@
 
 #include "Common.h"
 
-#ifdef OS_WIN
+#ifdef Q_OS_WIN
 #pragma warning (disable : 4996)
 #include <Windows.h>
 #define snprintf _snprintf
@@ -31,7 +31,7 @@
 #endif
 
 void Platform::sleepMillis(int millis) {
-#ifdef OS_WIN
+#ifdef Q_OS_WIN
   Sleep(millis);
 #else
   usleep(millis * 1000);
@@ -39,7 +39,7 @@ void Platform::sleepMillis(int millis) {
 }
 
 long Platform::elapsedMillis() {
-#ifdef OS_WIN
+#ifdef Q_OS_WIN
   static long start = GetTickCount();
   return GetTickCount() - start;
 #else
@@ -71,3 +71,15 @@ void Platform::runShutdownHooks() {
     f();
   });
 }
+
+const QString Resource::IMAGES_CUBE_TEXTURE_PNG{ ":/images/valve_hmd_cube_texture.png" };
+const QString Resource::IMAGES_FLOOR_PNG{ ":/images/floor.png" };
+const QString Resource::SHADERS_SIMPLE_VS{ ":/shaders/Simple.vs" };
+const QString Resource::SHADERS_COLORED_FS{ ":/shaders/SimpleColored.fs" };
+const QString Resource::SHADERS_TEXTURED_FS{ ":/shaders/SimpleTextured.fs" };
+const QString Resource::SHADERS_CUBEMAP_VS{ ":/shaders/CubeMap.vs" };
+const QString Resource::SHADERS_CUBEMAP_FS{ ":/shaders/CubeMap.fs" };
+const QString Resource::SHADERS_COLORCUBE_VS{ ":/shaders/ColorCube.vs" };
+const QString Resource::SHADERS_COLORCUBE_FS{ ":/shaders/ColorCube.fs" };
+const QString Resource::MISC_GLSL_XML{ ":/misc/glsl.xml" };
+const QString& Resource::SHADERS_TEXTURED_VS = Resource::SHADERS_SIMPLE_VS;

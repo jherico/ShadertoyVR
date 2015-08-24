@@ -6,15 +6,16 @@ ExternalProject_Add(
   URL_MD5 fab76fc982b256b46208e5c750ed456a
   BINARY_DIR ${EXTERNAL_PROJECT_PREFIX}/build
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
   LOG_DOWNLOAD 1
-  LOG_CONFIGURE 1
-  LOG_BUILD 1
 )
 
 # Hide this external target (for ide users)
 set_target_properties(${EXTERNAL_NAME} PROPERTIES FOLDER "hidden/externals")
 
-ExternalProject_Get_Property(${EXTERNAL_NAME} INSTALL_DIR)
+ExternalProject_Get_Property(${EXTERNAL_NAME} SOURCE_DIR)
 
 string(TOUPPER ${EXTERNAL_NAME} EXTERNAL_NAME_UPPER)
-set(${EXTERNAL_NAME_UPPER}_INCLUDE_DIRS ${INSTALL_DIR}/include CACHE PATH "List of glm include directories")
+set(${EXTERNAL_NAME_UPPER}_INCLUDE_DIRS ${SOURCE_DIR} CACHE PATH "List of glm include directories")

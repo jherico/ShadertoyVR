@@ -17,54 +17,36 @@
 
  ************************************************************************************/
 
+#include "Common.h"
 #include "QtCommon.h"
 
-#include <QJsonObject>
-#include <QDomDocument>
-#include <QImage>
+namespace qt {
+	QSize sizeFromGlm(const vec2 & size) {
+		return QSize(size.x, size.y);
+	}
 
-#ifdef HAVE_OPENCV
-#include <opencv2/opencv.hpp>
-#else
-#include <oglplus/images/png.hpp>
-#endif
-
-
-  namespace qt {
-    template<typename T>
-    T toQtType(Resource res) {
-      T result;
-      size_t size = Resources::getResourceSize(res);
-      result.resize(size);
-      Resources::getResourceData(res, result.data());
-      return result;
-    }
-
-
-    QSize sizeFromGlm(const vec2 & size) {
-      return QSize(size.x, size.y);
-    }
-
-    QPointF pointFromGlm(const vec2 & pt) {
-      return QPointF(pt.x, pt.y);
-    }
-  }
+	QPointF pointFromGlm(const vec2 & pt) {
+		return QPointF(pt.x, pt.y);
+	}
+}
 
 QJsonValue path(const QJsonValue & parent, std::initializer_list<QVariant> elements) {
-  QJsonValue current = parent;
-  std::for_each(elements.begin(), elements.end(), [&](const QVariant & element) {
-    if (current.isObject()) {
-      QString path = element.toString();
-      current = current.toObject().value(path);
-    } else if (current.isArray()) {
-      int offset = element.toInt();
-      current = current.toArray().at(offset);
-    } else {
-      qWarning() << "Unable to continue";
-      current = QJsonValue();
-    }
-  });
-  return current;
+	QJsonValue current = parent;
+	std::for_each(elements.begin(), elements.end(), [&](const QVariant & element) {
+		if (current.isObject()) {
+			QString path = element.toString();
+			current = current.toObject().value(path);
+		}
+		else if (current.isArray()) {
+			int offset = element.toInt();
+			current = current.toArray().at(offset);
+		}
+		else {
+			qWarning() << "Unable to continue";
+			current = QJsonValue();
+		}
+	});
+	return current;
 }
 
 typedef std::list<QString> List;
@@ -73,25 +55,25 @@ typedef std::pair<QString, List> Pair;
 
 template <typename F>
 void for_each_node(const QDomNodeList & list, F f) {
-  for (int i = 0; i < list.size(); ++i) {
-    f(list.at(i));
-  }
+	for (int i = 0; i < list.size(); ++i) {
+		f(list.at(i));
+	}
 }
 
 static ImagePtr loadImageWithAlpha(const std::vector<uint8_t> & data, bool flip) {
-  using namespace oglplus;
-  return ImagePtr();
+	using namespace oglplus;
+	return ImagePtr();
 }
 
 QSurfaceFormat getDesiredSurfaceFormat() {
-    QSurfaceFormat format;
-    format.setDepthBufferSize(16);
-    format.setStencilBufferSize(8);
-    format.setMajorVersion(4);
-    format.setMinorVersion(3);
-    format.setProfile(QSurfaceFormat::OpenGLContextProfile::CoreProfile);
+	QSurfaceFormat format;
+	format.setDepthBufferSize(16);
+	format.setStencilBufferSize(8);
+	format.setMajorVersion(4);
+	format.setMinorVersion(3);
+	format.setProfile(QSurfaceFormat::OpenGLContextProfile::CoreProfile);
 #ifdef DEBUG
-    format.setOption(QSurfaceFormat::DebugContext);
+	format.setOption(QSurfaceFormat::DebugContext);
 #endif
-    return format;
+	return format;
 }

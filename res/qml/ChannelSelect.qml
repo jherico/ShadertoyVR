@@ -1,19 +1,20 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Window 2.2
+import "controls"
 
 Item {
     id: channelRoot
     width: 1280
     height: 720
 
-    CustomBorder {
+    Border {
         id: textureGroup
         width: channelRoot.width
         height: 384 + 24 + 48
         anchors.top: parent.top
         anchors.topMargin: 0
-        CustomText {
+        Text {
             id: labelTextures
             text: qsTr("Textures")
             anchors.top: texturesColumn.top
@@ -51,7 +52,7 @@ Item {
                 TextureIcon { source: "qrc:/presets/tex14.png" }
                 TextureIcon { source: "qrc:/presets/tex15.png" }
                 TextureIcon { source: "qrc:/presets/tex16.png" }
-                CustomButton {
+                Button {
                     id: browse
                     width: 256 + 24
                     height: parent.height
@@ -65,14 +66,14 @@ Item {
         }
     }
 
-    CustomBorder {
+    Border {
         id: cubemapGroup
         width: channelRoot.width
         height: 128 + 48
         anchors.top: textureGroup.bottom
         anchors.topMargin: 8
 
-        CustomText {
+        Text {
             id: labelCubemaps
             text: qsTr("Cubemaps")
             anchors.left: parent.left
@@ -96,7 +97,7 @@ Item {
     }
 
 
-    CustomButton {
+    Button {
         id: cancel
         width: 256
         text: qsTr("Cancel")

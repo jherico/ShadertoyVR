@@ -18,8 +18,7 @@ limitations under the License.
 ************************************************************************************/
 #pragma once
 
-#include <QStringList>
-
+#include <QtQuick/QQuickItem>
 
 class MainWindow : public QQuickItem {
     Q_OBJECT

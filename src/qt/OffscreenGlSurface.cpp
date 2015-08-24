@@ -6,9 +6,15 @@
 //  See the accompanying file LICENSE or http://www.apache.org/licenses/LICENSE-2.0.html
 //
 
-#include "QtCommon.h"
+#include "Common.h"
 
-OffscreenGlSurface::OffscreenGlSurface() {
+#include "OffscreenGlSurface.h"
+
+#include <QtGui/QOpenGLContext>
+
+#include "QtUtils.h"
+
+OffscreenGlSurface::OffscreenGlSurface() : _context(new QOpenGLContext(this)){
 }
 
 OffscreenGlSurface::~OffscreenGlSurface() {
@@ -16,24 +22,24 @@ OffscreenGlSurface::~OffscreenGlSurface() {
 
 void OffscreenGlSurface::create(QOpenGLContext* sharedContext) {
     if (nullptr != sharedContext) {
-        _context.setShareContext(sharedContext);
+        _context->setShareContext(sharedContext);
     } 
-    _context.setFormat(getDesiredSurfaceFormat());
-    _context.create();
+    _context->setFormat(getDesiredSurfaceFormat());
+    _context->create();
 
-    QOffscreenSurface::setFormat(_context.format());
+    QOffscreenSurface::setFormat(_context->format());
     QOffscreenSurface::create();
 }
 
 bool OffscreenGlSurface::makeCurrent() {
-    return _context.makeCurrent(this);
+    return _context->makeCurrent(this);
 }
 
 void OffscreenGlSurface::doneCurrent() {
-    _context.doneCurrent();
+    _context->doneCurrent();
 }
 
 QOpenGLContext* OffscreenGlSurface::context() {
-    return &_context;
+    return _context;
 }
 

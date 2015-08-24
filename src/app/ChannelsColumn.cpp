@@ -1,4 +1,5 @@
-#include <QtCommon.h>
+#include "Common.h"
+
 #include "ChannelsColumn.h"
 
 ChannelsColumn::ChannelsColumn(QQuickItem* parent) : QQuickItem(parent) {
@@ -6,12 +7,10 @@ ChannelsColumn::ChannelsColumn(QQuickItem* parent) : QQuickItem(parent) {
         QString name = QString("channel") + i;
         _sources[i] = findChild<QQuickItem*>(name);
     }
-    qDebug() << "X";
 }
 
 ChannelsColumn::~ChannelsColumn() {
 }
-
 
 void ChannelsColumn::channelSelect(int index) {
     qDebug() << index;

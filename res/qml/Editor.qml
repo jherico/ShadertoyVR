@@ -3,12 +3,13 @@ import QtQuick.Controls 1.2
 import QtQuick.Window 2.2
 import QtQuick.Controls.Styles 1.3
 import Qt.labs.settings 1.0
+import ShadertoyVR 1.0
+import "controls"
 
-Rectangle {
+EditWindow {
     id: editRoot
     width: 1280
     height: 720
-    color: "#00000000"
     function setChannelIcon(channel, path) {
         var channelItem;
         switch(channel) {
@@ -43,7 +44,7 @@ Rectangle {
         anchors.topMargin: 0
         spacing: 8
 
-        CustomBorder {
+        Border {
             id: channel0control
             height: 128 + 24
             width: 128 + 24
@@ -63,7 +64,7 @@ Rectangle {
             }
         }
 
-        CustomBorder {
+        Border {
             id: channel1control
             height: 128 + 24
             width: 128 + 24
@@ -80,7 +81,7 @@ Rectangle {
             }
         }
 
-        CustomBorder {
+        Border {
             id: channel2control
             height: 128 + 24
             width: 128 + 24
@@ -97,7 +98,7 @@ Rectangle {
             }
         }
 
-        CustomBorder {
+        Border {
             id: channel3control
             height: 128 + 24
             width: 128 + 24
@@ -131,7 +132,7 @@ Rectangle {
     }
 
 
-    CustomBorder {
+    Border {
         id: infoColumn
         width: 196
         anchors.top: parent.top
@@ -146,21 +147,21 @@ Rectangle {
             anchors.margins: parent.margin * 2
             columns: 2
             spacing: 12
-            CustomText { text: "FPS"; } CustomText { objectName: "fps"; text: "0" }
-            CustomText { text: "RES"; } CustomText { objectName: "res"; text: "0" }
-            CustomText { text: "EPS"; } CustomText { objectName: "eps"; text: "0" }
-            CustomText { text: "EPF";  } Switch {
+            Text { text: "FPS"; } Text { objectName: "fps"; text: "0" }
+            Text { text: "RES"; } Text { objectName: "res"; text: "0" }
+            Text { text: "EPS"; } Text { objectName: "eps"; text: "0" }
+            Text { text: "EPF";  } Switch {
                 objectName: "epf";
                 onCheckedChanged: {
                     root.toggleEyePerFrame();
                 }
             }
-            CustomText { text: "Font";  } Row {
-                IconControl {
+            Text { text: "Font";  } Row {
+                Icon {
                     text: "\uF056"
                     onClicked: shaderTextEdit.font.pointSize -= 1
                 }
-                IconControl {
+                Icon {
                     text: "\uF055"
                     onClicked: shaderTextEdit.font.pointSize += 1
                 }
@@ -181,7 +182,7 @@ Rectangle {
             anchors.right: parent.right
             spacing: 8
             layoutDirection: Qt.RightToLeft
-            CustomButton {
+            Button {
                 id: load
                 height: parent.height
                 text: qsTr("Load")
@@ -190,7 +191,7 @@ Rectangle {
                     loader.visible = true;
                 }
             }
-            CustomButton {
+            Button {
                 id: save
                 height: parent.height
                 text: qsTr("Save")
@@ -205,7 +206,7 @@ Rectangle {
             anchors.left: parent.left
             spacing: 8
 
-            CustomButton {
+            Button {
                 id: run
                 height: parent.height
                 text: qsTr("Run")
@@ -216,7 +217,7 @@ Rectangle {
 
     onVisibleChanged: {
         if (visible) {
-            shaderTextEdit.forceActiveFocus()
+            //shaderTextEdit.forceActiveFocus()
         }
     }
 }

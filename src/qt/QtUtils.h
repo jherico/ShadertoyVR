@@ -29,7 +29,7 @@
 #include <QQuickRenderControl>
 #include <QQuickImageProvider>
 #include <QSurfaceFormat>
-#include <QThread>
+
 
 namespace qt {
     inline ivec2 toGlm(const QPoint & pt) {
@@ -46,21 +46,6 @@ namespace qt {
 
     QSize sizeFromGlm(const vec2 & size);
     QPointF pointFromGlm(const vec2 & pt);
-}
-
-inline QByteArray readFileToByteArray(const QString & fileName) {
-    QFile f(fileName);
-    f.open(QFile::ReadOnly);
-    return f.readAll();
-}
-
-inline std::vector<uint8_t> readFileToVector(const QString & fileName) {
-    QByteArray ba = readFileToByteArray(fileName);
-    return std::vector<uint8_t>(ba.constData(), ba.constData() + ba.size());
-}
-
-inline QString readFileToString(const QString & fileName) {
-    return QString(readFileToByteArray(fileName));
 }
 
 QJsonValue path(const QJsonValue & parent, std::initializer_list<QVariant> elements);
@@ -85,26 +70,3 @@ public:
 
 QSurfaceFormat getDesiredSurfaceFormat();
 
-
-#ifdef OS_WIN
-#define QT_APP_WITH_ARGS(AppClass) \
-  int argc = 1; \
-  char ** argv = &lpCmdLine;  \
-  AppClass app(argc, argv);
-#else
-#define QT_APP_WITH_ARGS(AppClass) AppClass app(argc, argv);
-#endif
-
-#define RUN_QT_APP(AppClass) \
-MAIN_DECL { \
-  try { \
-    qputenv("QT_QPA_PLATFORM_PLUGIN_PATH", "."); \
-    QT_APP_WITH_ARGS(AppClass); \
-    return app.exec(); \
-  } catch (std::exception & error) { \
-    SAY_ERR(error.what()); \
-  } catch (const std::string & error) { \
-    SAY_ERR(error.c_str()); \
-  } \
-  return -1; \
-}

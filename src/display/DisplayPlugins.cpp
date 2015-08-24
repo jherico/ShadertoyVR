@@ -1,9 +1,6 @@
+#include "Common.h"
 #include "DisplayPlugins.h"
 
-
-#include <memory>
-#include <vector>
-#include <mutex>
 
 #include "oculus/OculusWin32.h"
 #include "Window.h"

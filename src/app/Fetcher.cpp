@@ -17,10 +17,11 @@ limitations under the License.
 
 ************************************************************************************/
 
-#include "qt/QtCommon.h"
-#include "Fetcher.h"
-#include "Globals.h"
+#include "Common.h"
 
+#include "Fetcher.h"
+
+#include "Globals.h"
 #include "ShadertoyConfig.h"
 
 static const QString SHADERTOY_API_URL = "https://www.shadertoy.com/api/v1/shaders";

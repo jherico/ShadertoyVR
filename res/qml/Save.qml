@@ -1,19 +1,20 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Window 2.2
+import "controls"
 
 Item {
     id: saveRoot
     width: 1280
     height: 720
 
-    CustomButton {
+    Button {
         id: save
         width: 256 - 64
         text: qsTr("Save")
-        anchors.right: customBorder1.right
+        anchors.right: border1.right
         anchors.rightMargin: 0
-        anchors.top: customBorder1.bottom
+        anchors.top: border1.bottom
         anchors.topMargin: 8
         onClicked: {
             root.saveShaderXml(shaderName.text);
@@ -21,7 +22,7 @@ Item {
         }
     }
 
-    CustomButton {
+    Button {
         id: cancel
         width: 256 - 64
         text: qsTr("Cancel")
@@ -34,8 +35,8 @@ Item {
         }
     }
 
-    CustomBorder {
-        id: customBorder1
+    Border {
+        id: border1
         width: 512
         height: 512
         radius: 2
@@ -44,15 +45,15 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
 
-        CustomBorder {
-            id: customBorder2
+        Border {
+            id: border2
             width: 384
             height: 64
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
             anchors.topMargin: 64
 
-            CustomTextEdit {
+            TextEdit {
                 id: shaderName
                 objectName: "shaderName"
                 verticalAlignment: TextEdit.AlignVCenter

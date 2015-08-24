@@ -1,15 +1,40 @@
 #pragma once
 #include <QGuiApplication>
 #include <QQuickView>
-#include <QVariantAnimation>
 
 #include "shadertoy/Shadertoy.h"
 #include "shadertoy/Renderer.h"
 #include "display/DisplayPlugins.h"
 #include "MainWindow.h"
 #include "CodeEditor.h"
+#include "qt/OffscreenGlSurface.h"
+#include "qt/OffscreenQmlSurface.h"
 
 class QOpenGLDebugLogger;
+
+#define SHADER_PROPERTY(type, name) \
+    Q_PROPERTY(type name READ name WRITE set##name NOTIFY name##Changed) \
+public: \
+    type name() { return _##name; }; \
+    void set##name(const type& new##name) { if (_##name != new##name) { _##name = new##name;  emit name##Changed(); } } \
+private: \
+    type _##name;
+
+
+class ShadertoyShader : public QObject {
+    Q_OBJECT
+    SHADER_PROPERTY(QString, shader);
+    SHADER_PROPERTY(QString, channel0);
+    SHADER_PROPERTY(QString, channel1);
+    SHADER_PROPERTY(QString, channel2);
+    SHADER_PROPERTY(QString, channel3);
+signals:
+    void shaderChanged();
+    void channel0Changed();
+    void channel1Changed();
+    void channel2Changed();
+    void channel3Changed();
+};
 
 class ShadertoyApp : public QGuiApplication {
     Q_OBJECT
@@ -37,7 +62,7 @@ private:
     void setupOffscreenUi();
     void setupRenderer();
 
-private slots:
+public slots:
     void onFrameRequested();
     void onUiTextureReady(GLuint texture, GLsync sync);
     void onSizeChanged();
@@ -61,7 +86,7 @@ private slots:
 
 
     //void onSaveShaderXml(const QString & shaderPath);
-    //void onChannelTextureChanged(const int & channelIndex, const int & channelType, const QString & texturePath);
+    void onChannelTextureChanged(const int & channelIndex, const int & channelType, const QString & texturePath);
     //void onModifyTextureResolution(double scale);
     //void onModifyPositionScale(double scale);
     //void onResetPositionScale();
@@ -85,9 +110,13 @@ private:
     // while leaving the actual texture we pass to the Oculus SDK fixed.
     // This allows us to have a clear UI regardless of the shader performance
     FramebufferWrapperPtr shaderFramebuffer;
+
+    ShadertoyShader _activeShader;
 };
 
+#if defined(qApp)
 #undef qApp
+#endif
 #define qApp (static_cast<ShadertoyApp*>(QGuiApplication::instance()))
 
 

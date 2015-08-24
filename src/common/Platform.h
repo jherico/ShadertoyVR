@@ -29,3 +29,18 @@ public:
   static void runShutdownHooks();
 };
 
+
+inline QByteArray readFileToByteArray(const QString & fileName) {
+    QFile f(fileName);
+    f.open(QFile::ReadOnly);
+    return f.readAll();
+}
+
+inline std::vector<uint8_t> readFileToVector(const QString & fileName) {
+    QByteArray ba = readFileToByteArray(fileName);
+    return std::vector<uint8_t>(ba.constData(), ba.constData() + ba.size());
+}
+
+inline QString readFileToString(const QString & fileName) {
+    return QString(readFileToByteArray(fileName));
+}

@@ -17,8 +17,9 @@ limitations under the License.
 
 ************************************************************************************/
 
-#include "QtCommon.h"
-#include "ShadertoyApp.h"
+#include "Common.h"
+
+#include "app/ShadertoyApp.h"
 
 
 #ifndef _DEBUG
@@ -29,51 +30,52 @@ limitations under the License.
 #include <Trackerbird.h>
 #endif
 
-MAIN_DECL {
-  try {
+int main(int argc, const char* argv[]) {
+    try {
 #if !defined(_DEBUG)
-    qputenv("QT_QPA_PLATFORM_PLUGIN_PATH", "./plugins");
+        qputenv("QT_QPA_PLATFORM_PLUGIN_PATH", "./plugins");
 #endif
-    QT_APP_WITH_ARGS(ShadertoyApp);
-    int result = app.exec();
-    Platform::runShutdownHooks();
-    return result;
-  } catch (std::exception & error) {
-    qFatal(error.what());
-  } catch (const std::string & error) {
-    qFatal(error.c_str());
-  }
-  return -1;
+        ShadertoyApp app(argc, const_cast<char**>(argv));
+
+        int result = app.exec();
+        Platform::runShutdownHooks();
+        return result;
+    } catch (std::exception & error) {
+        qFatal(error.what());
+    } catch (const std::string & error) {
+        qFatal(error.c_str());
+    }
+    return -1;
 }
 
 #if 0
 SiHdl si;
 SiGetEventData getEventData;
 bool nativeEventFilter(const QByteArray & eventType, void * message, long * result) {
-  // On Windows, eventType is set to "windows_generic_MSG" for messages sent
-  // to toplevel windows, and "windows_dispatcher_MSG" for system - wide
-  // messages such as messages from a registered hot key.In both cases, the
-  // message can be casted to a MSG pointer.The result pointer is only used
-  // on Windows, and corresponds to the LRESULT pointer.
-  MSG & msg = *(MSG*)message;
-  SiSpwEvent siEvent;
-  vec3 tr, ro;
-  long * md = siEvent.u.spwData.mData;
-  SiGetEventWinInit(&getEventData, msg.message, msg.wParam, msg.lParam);
-  if (SiGetEvent(si, 0, &getEventData, &siEvent) == SI_IS_EVENT) {
-    switch (siEvent.type) {
-    case SI_MOTION_EVENT:
-      emit sixDof(
-        vec3(md[SI_TX], md[SI_TY], -md[SI_TZ]),
-        vec3(md[SI_RX], md[SI_RY], md[SI_RZ]));
-      break;
+    // On Windows, eventType is set to "windows_generic_MSG" for messages sent
+    // to toplevel windows, and "windows_dispatcher_MSG" for system - wide
+    // messages such as messages from a registered hot key.In both cases, the
+    // message can be casted to a MSG pointer.The result pointer is only used
+    // on Windows, and corresponds to the LRESULT pointer.
+    MSG & msg = *(MSG*)message;
+    SiSpwEvent siEvent;
+    vec3 tr, ro;
+    long * md = siEvent.u.spwData.mData;
+    SiGetEventWinInit(&getEventData, msg.message, msg.wParam, msg.lParam);
+    if (SiGetEvent(si, 0, &getEventData, &siEvent) == SI_IS_EVENT) {
+        switch (siEvent.type) {
+        case SI_MOTION_EVENT:
+            emit sixDof(
+                vec3(md[SI_TX], md[SI_TY], -md[SI_TZ]),
+                vec3(md[SI_RX], md[SI_RY], md[SI_RZ]));
+            break;
 
-    default:
-      break;
+        default:
+            break;
+        }
+        return true;
     }
-    return true;
-  }
-  return false;
+    return false;
 }
 
 SpwRetVal result = SiInitialize();
@@ -85,8 +87,6 @@ si = SiOpen("app", devId, SI_NO_MASK, SI_EVENT, &siData);
 installNativeEventFilter(this);
 
 #endif
-
-
 
 /*
 yes:

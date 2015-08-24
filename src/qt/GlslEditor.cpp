@@ -17,9 +17,12 @@ limitations under the License.
 
 ************************************************************************************/
 
-#include "QtCommon.h"
+#include "Common.h"
 #include "GlslEditor.h"
-#include <QDomDocument>
+
+#include <QtXml/QDomDocument>
+
+#include "QtCommon.h"
 
 typedef std::list<QString> List;
 typedef std::map<QString, List> Map;
@@ -38,10 +41,7 @@ static Map createGlslMap() {
   Map listMap;
   map<QString, Map> contextMapMap;
   QDomDocument document;
-  {
-    std::vector<uint8_t> data = Platform::getResourceByteVector(Resource::MISC_GLSL_XML);
-    document.setContent(QByteArray((const char*)&data[0], (int)data.size()));
-  }
+  document.setContent(readFileToByteArray(Resource::MISC_GLSL_XML));
   QDomElement s = document.documentElement().firstChildElement();
   for_each_node(s.childNodes(), [&](QDomNode child) {
     if (QString("list") == child.nodeName()) {

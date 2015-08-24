@@ -46,8 +46,11 @@ namespace oria {
 			f();
 		});
 
+    auto err = glGetError();
 		shape->Use();
+    err = glGetError();
 		shape->Draw();
+    err = glGetError();
 
 		oglplus::NoProgram().Bind();
 		oglplus::NoVertexArray().Bind();
@@ -128,33 +131,6 @@ namespace oria {
 			);
 	}
 
-	void renderSkybox(Resource firstImageResource) {
-		using namespace oglplus;
-
-		static ProgramPtr program;
-		static ShapeWrapperPtr shape;
-		if (!program) {
-			program = loadProgram(Resource::SHADERS_CUBEMAP_VS, Resource::SHADERS_CUBEMAP_FS);
-			shape = ShapeWrapperPtr(new shapes::ShapeWrapper(List("Position").Get(), shapes::SkyBox(), *program));
-			Platform::addShutdownHook([&] {
-				program.reset();
-				shape.reset();
-			});
-		}
-
-		TexturePtr texture = loadCubemapTexture(firstImageResource);
-		texture->Bind(TextureTarget::CubeMap);
-		MatrixStack & mv = Stacks::modelview();
-		mv.withPush([&] {
-			Context::Disable(Capability::DepthTest);
-			Context::Disable(Capability::CullFace);
-			renderGeometry(shape, program);
-			Context::Enable(Capability::CullFace);
-			Context::Enable(Capability::DepthTest);
-		});
-		DefaultTexture().Bind(TextureTarget::CubeMap);
-	}
-
 	void renderFloor() {
 		using namespace oglplus;
 		const float SIZE = 100;
@@ -183,177 +159,6 @@ namespace oria {
 		});
 
 		DefaultTexture().Bind(TextureTarget::_2D);
-	}
-
-	ShapeWrapperPtr loadShape(const std::initializer_list<const GLchar*>& names, Resource resource) {
-		using namespace oglplus;
-		return ShapeWrapperPtr(new shapes::ShapeWrapper(names, shapes::CtmMesh(resource)));
-	}
-
-	ShapeWrapperPtr loadShape(const std::initializer_list<const GLchar*>& names, Resource resource, ProgramPtr program) {
-		using namespace oglplus;
-		return ShapeWrapperPtr(new shapes::ShapeWrapper(names, shapes::CtmMesh(resource), *program));
-	}
-
-	void renderManikin() {
-		static ProgramPtr program;
-		static ShapeWrapperPtr shape;
-
-		if (!program) {
-			program = loadProgram(Resource::SHADERS_LIT_VS, Resource::SHADERS_LITCOLORED_FS);
-			shape = loadShape({ "Position", "Normal" }, Resource::MESHES_MANIKIN_CTM, program);
-			Platform::addShutdownHook([&] {
-				program.reset();
-				shape.reset();
-			});
-		}
-
-
-		renderGeometry(shape, program, [&] {
-			bindLights(program);
-		});
-	}
-
-	void renderRift() {
-		using namespace oglplus;
-		static ProgramPtr program;
-		static ShapeWrapperPtr shape;
-		if (!program) {
-			Platform::addShutdownHook([&] {
-				program.reset();
-				shape.reset();
-			});
-
-			program = loadProgram(Resource::SHADERS_LIT_VS, Resource::SHADERS_LITCOLORED_FS);
-			shape = ::oria::loadShape({ "Position", "Normal" }, Resource::MESHES_RIFT_CTM, program);
-		}
-
-		auto & mv = Stacks::modelview();
-		mv.withPush([&] {
-			mv.rotate(-QUARTER_TAU - 0.22f, Vectors::X_AXIS).scale(0.5f);
-			renderGeometry(shape, program, [&] {
-				oria::bindLights(program);
-			});
-		});
-	}
-
-	void renderArtificialHorizon(float alpha) {
-		using namespace oglplus;
-		static ProgramPtr program;
-		static ShapeWrapperPtr shape;
-		static std::vector<Vec4f> materials = {
-			Vec4f(0.351366f, 0.665379f, 0.800000f, 1),
-			Vec4f(0.640000f, 0.179600f, 0.000000f, 1),
-			Vec4f(0.000000f, 0.000000f, 0.000000f, 1),
-			Vec4f(0.171229f, 0.171229f, 0.171229f, 1),
-			Vec4f(0.640000f, 0.640000f, 0.640000f, 1)
-		};
-
-		if (!program) {
-			Platform::addShutdownHook([&] {
-				program.reset();
-				shape.reset();
-			});
-
-			program = loadProgram(Resource::SHADERS_LITMATERIALS_VS, Resource::SHADERS_LITCOLORED_FS);
-			std::stringstream && stream = Platform::getResourceStream(Resource::MESHES_ARTIFICIAL_HORIZON_OBJ);
-			shapes::ObjMesh mesh(stream);
-			shape = ShapeWrapperPtr(new shapes::ShapeWrapper({ "Position", "Normal", "Material" }, mesh, *program));
-			Uniform<Vec4f>(*program, "Materials[0]").Set(materials);
-		}
-
-		auto & mv = Stacks::modelview();
-		mv.withPush([&] {
-			renderGeometry(shape, program, [&] {
-				Uniform<float>(*program, "ForceAlpha").Set(alpha);
-				oria::bindLights(program);
-			});
-		});
-
-	}
-
-	void renderManikinScene(float ipd, float eyeHeight) {
-		oria::renderSkybox(Resource::IMAGES_SKY_CITY_XNEG_PNG);
-		oria::renderFloor();
-
-		// Scale the size of the cube to the distance between the eyes
-		MatrixStack & mv = Stacks::modelview();
-
-		mv.withPush([&] {
-			mv.translate(glm::vec3(0, eyeHeight, 0)).scale(glm::vec3(ipd));
-			oria::renderColorCube();
-		});
-
-		mv.withPush([&] {
-			mv.translate(glm::vec3(0, 0, ipd * -5.0));
-			oglplus::Context::Disable(oglplus::Capability::CullFace);
-			oria::renderManikin();
-		});
-	}
-
-	void renderExampleScene(float ipd, float eyeHeight) {
-		oria::renderSkybox(Resource::IMAGES_SKY_CITY_XNEG_PNG);
-		oria::renderFloor();
-
-		MatrixStack & mv = Stacks::modelview();
-		mv.withPush([&] {
-			mv.translate(glm::vec3(0, eyeHeight, 0)).scale(glm::vec3(ipd));
-			oria::renderColorCube();
-		});
-		mv.withPush([&] {
-			mv.translate(glm::vec3(0, eyeHeight / 2, 0)).scale(glm::vec3(ipd / 2, eyeHeight, ipd / 2));
-			oria::renderColorCube();
-		});
-
-	}
-
-
-	void GL_CALLBACK debugCallback(
-		GLenum source,
-		GLenum type,
-		GLuint id,
-		GLenum severity,
-		GLsizei length,
-		const GLchar * message,
-		void * userParam) {
-		const char * typeStr = "?";
-		switch (type) {
-		case GL_DEBUG_TYPE_ERROR:
-			typeStr = "ERROR";
-			break;
-		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-			typeStr = "DEPRECATED_BEHAVIOR";
-			break;
-		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-			typeStr = "UNDEFINED_BEHAVIOR";
-			break;
-		case GL_DEBUG_TYPE_PORTABILITY:
-			typeStr = "PORTABILITY";
-			break;
-		case GL_DEBUG_TYPE_PERFORMANCE:
-			typeStr = "PERFORMANCE";
-			break;
-		case GL_DEBUG_TYPE_OTHER:
-			typeStr = "OTHER";
-			break;
-		}
-
-		const char * severityStr = "?";
-		switch (severity) {
-		case GL_DEBUG_SEVERITY_LOW:
-			severityStr = "LOW";
-			break;
-		case GL_DEBUG_SEVERITY_MEDIUM:
-			severityStr = "MEDIUM";
-			break;
-		case GL_DEBUG_SEVERITY_HIGH:
-			severityStr = "HIGH";
-			break;
-		}
-		SAY("--- OpenGL Callback Message ---");
-		SAY("type: %s\nseverity: %-8s\nid: %d\nmsg: %s", typeStr, severityStr, id,
-			message);
-		SAY("--- OpenGL Callback Message ---");
 	}
 
 	ShapeWrapperPtr loadSphere(const std::initializer_list<const GLchar*>& names, ProgramPtr program) {

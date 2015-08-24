@@ -1,11 +1,5 @@
 #pragma once
 
-namespace oria {
-  std::string readFile(const std::string & filename);
-}
-
-
-
 class RateCounter {
   std::vector<float> times;
 
