@@ -1,0 +1,12 @@
+[submodule "libraries/glm"]
+	path = libraries/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "libraries/OculusSDK"]
+	path = libraries/OculusSDK
+	url = https://github.com/jherico/OculusSDK.git
+[submodule "libraries/boostconfig"]
+	path = libraries/boostconfig
+	url = https://github.com/boostorg/config.git
+[submodule "libraries/oglplus"]
+	path = libraries/oglplus
+	url = https://github.com/matus-chochlik/oglplus.git
